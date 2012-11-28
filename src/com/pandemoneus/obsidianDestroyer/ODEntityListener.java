@@ -1,6 +1,7 @@
 package com.pandemoneus.obsidianDestroyer;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Timer;
 
 import org.bukkit.Location;
@@ -64,12 +65,17 @@ public final class ODEntityListener implements Listener {
 		final String eventTypeRep = event.getEntity().toString();
 
 		// cancel if detonator was neither TNT, a creeper nor a ghast
-		if (!(eventTypeRep.equals("CraftTNTPrimed") || eventTypeRep.equals("CraftCreeper") || eventTypeRep.equals("CraftFireball") || eventTypeRep.equals("CraftGhast"))) {
+		if (!(eventTypeRep.equals("CraftTNTPrimed") || eventTypeRep.equals("CraftCreeper") || eventTypeRep.equals("CraftFireball") || eventTypeRep.equals("CraftGhast") || eventTypeRep.equals("CraftSnowball"))) {
 			return;
 		}
 
 		// cancel if detonator was TNT, but TNT not allowed to destroy obsidian
 		if (eventTypeRep.equals("CraftTNTPrimed") && !config.getTntEnabled()) {
+			return;
+		}
+		
+		// cancel if detonator was Snowball, but Cannons not allowed to destroy obsidian
+		if (eventTypeRep.equals("CraftSnowball") && !config.getCannonsEnabled()) {
 			return;
 		}
 
@@ -82,6 +88,15 @@ public final class ODEntityListener implements Listener {
 		// cancel if detonator was a ghast, but ghasts not allowed to destroy
 		// obsidian
 		if ((eventTypeRep.equals("CraftFireball") || eventTypeRep.equals("CraftGhast")) && !config.getGhastsEnabled()) {
+			return;
+		}
+		
+		if (eventTypeRep.equals("CraftSnowball")) {
+			Iterator<Block> iter = event.blockList().iterator();
+			while (iter.hasNext()){
+				Block block = iter.next();
+				blowBlockUp(block.getLocation());
+			}
 			return;
 		}
 
@@ -106,7 +121,7 @@ public final class ODEntityListener implements Listener {
 
 		final Block b = at.getBlock();
 
-		if (b.getTypeId() == 49) {
+		if (b.getTypeId() == 49 || b.getTypeId() == 116) {
 			// random formula to create unique integers
 			Integer representation = at.getWorld().hashCode() + at.getBlockX() * 2389 + at.getBlockY() * 4027 + at.getBlockZ() * 2053;
 
@@ -152,7 +167,7 @@ public final class ODEntityListener implements Listener {
 
 		final Block b = at.getBlock();
 
-		if (!b.getType().equals(Material.OBSIDIAN)) {
+		if (!b.getType().equals(Material.OBSIDIAN) && !b.getType().equals(Material.ENCHANTMENT_TABLE)) {
 			return;
 		}
 
