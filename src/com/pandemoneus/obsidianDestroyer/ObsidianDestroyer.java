@@ -1,5 +1,9 @@
 package com.pandemoneus.obsidianDestroyer;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import com.pandemoneus.obsidianDestroyer.Metrics;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -23,6 +27,8 @@ public final class ObsidianDestroyer extends JavaPlugin {
 	private final ODEntityListener entityListener = new ODEntityListener(this);
 	private Permission permissionsHandler;
 	private boolean permissionsFound = true;
+	public static ObsidianDestroyer plugin;
+	public static final Logger log = Logger.getLogger("Minecraft");
 
 	private static String version;
 	private static final String PLUGIN_NAME = "ObsidianDestroyer";
@@ -54,6 +60,17 @@ public final class ObsidianDestroyer extends JavaPlugin {
 		entityListener.setObsidianDurability(config.loadDurabilityFromFile());
 
 		getServer().getPluginManager().registerEvents(entityListener, this);
+	}
+	
+	public void startMetrics() { 	
+		PluginDescriptionFile pdfFile = this.getDescription();
+		try {	
+			Metrics metrics = new Metrics(this);	
+			metrics.start();
+			ObsidianDestroyer.log.info("[" + pdfFile.getName() + "] Metrics connection started.");
+		} catch (IOException e) {
+			ObsidianDestroyer.log.warning("[" + pdfFile.getName() + "] Failed to submit the stats :-("); // Failed to submit the stats :-(
+		}
 	}
 
 	/**
